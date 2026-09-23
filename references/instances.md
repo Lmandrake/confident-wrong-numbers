@@ -19,6 +19,10 @@ Contents:
 11. [A text scan that ignores grammar](#11-a-text-scan-that-ignores-grammar)
 12. [An uncalibrated zero](#12-an-uncalibrated-zero)
 13. [Shared-premise agreement](#13-shared-premise-agreement)
+14. [A formula copied without its inputs](#14-a-formula-copied-without-its-inputs)
+15. [An acceptance window that cannot fail](#15-an-acceptance-window-that-cannot-fail)
+16. [A single sample of a stochastic process](#16-a-single-sample-of-a-stochastic-process)
+17. [Two displayed values, two sources](#17-two-displayed-values-two-sources)
 
 ---
 
@@ -102,10 +106,18 @@ you did not think of. Both produce a clean integer.
   bare Star Wars names that resolved fine against an *active* donor.
 - **Narrower: a backtick-only regex.** A subject packageId was backticked in
   28 files, bare in 34, absent in 16. The regex read `None` for 50 of 78.
+- **Narrower: text-matching an XML tag instead of parsing it.** A review sheet
+  read a donor def by matching `<ThingDef>…</ThingDef>` as text; the donor put
+  `<descriptionHyperlinks><ThingDef>…</ThingDef></descriptionHyperlinks>`
+  *before* the real `<plant>` block, so the match truncated early and 11 of 13
+  rows read a size field as ABSENT, recording the vanilla fallback AS a
+  measurement. The tell: the only 2 rows without `descriptionHyperlinks` were
+  the only 2 correct ones.
 
 **Honest instrument:** print what the pattern matched on a sample and look at
 it; run it against a known positive *and* a known negative before trusting
-the count. Measure `_south.png` alone, not `*south*`.
+the count. Measure `_south.png` alone, not `*south*`. Parse XML with a parser,
+never a tag-shaped regex.
 
 ## 5. A key that does not exist
 
@@ -207,6 +219,13 @@ widened, a default that was widened on a guess.
   as much as an existence one.
 - **An audit's `marineChecked` scope defaulted to `['Coast']`;** widening it on
   a guess flagged 313 unrelated placements and an agent auto-removed 50.
+- **A whole-document substring count instead of the one key path that means
+  it.** Counting every `BMT_`-prefixed string anywhere in a roster JSON
+  produced "27 unreconciled names" and a filed item; every one of those
+  strings actually lived under `.evictions[].def` — an array of
+  ALREADY-DISPOSITIONED records, not live gaps — and the real count of
+  unreconciled names was zero. Count the live collection by its key path,
+  never the whole document.
 
 **Honest instrument:** put the scope in the report — "on map X", "under
 directory Y", "with scope Z". If a tool has a scope parameter, name the value
@@ -271,3 +290,67 @@ Agreement is corroboration only when the instruments differ in *shape*.
 scan, live instead of record, one record printed whole instead of a field
 extracted from all. If you cannot name what premise the second instrument
 does *not* share with the first, it is the same instrument.
+
+## 14. A formula copied without its inputs
+
+**Shape.** Copying a reference's formula is not the same as reproducing the
+reference's result — the formula only delivers the same output on the same
+distribution of inputs it was tuned against.
+
+- **`maxDrawSizeInTiles = inradius * 2.4`**, lifted literally from vanilla,
+  left 48 of 71 labels sitting at the curve floor and inverted the size
+  order — an 818-tile region outranked a 2,051-tile one — because the
+  inradii this project's regions actually produce are not what vanilla's own
+  routine would have produced them from.
+
+**Honest instrument:** check that the borrowed formula delivers the RULING
+(the ranking, the spread, the floor/ceiling behaviour it was chosen for) on
+your actual inputs before shipping it, not just that the expression matches
+the source.
+
+## 15. An acceptance window that cannot fail
+
+**Shape.** A bar written as "wait N ticks, then require condition C" is
+unfalsifiable if C can flip back to false before N — the wait outlives the
+window it is meant to observe, so a genuine success reads as failure.
+
+- **`waitTicks=600, require lastCastTickAdvanced AND onCooldown`** on an
+  ability that warms up in ~460 ticks and cools down in 240: by tick 600 the
+  cooldown had already finished, so `onCooldown:false` read for a cast that
+  had demonstrably fired.
+
+**Honest instrument:** binary-search the wait against the mechanism's own
+timing, or assert on the transition (cooldown went true, then false) rather
+than a fixed-delay snapshot.
+
+## 16. A single sample of a stochastic process
+
+**Shape.** A generator or spawner that is only PROBABLY correct produces a
+different result each time it runs. Reading one placement as a census over-
+or under-counts by however much the process varies.
+
+- **KCSG pawn symbols:** the spawned pawn's kindDef is not reliably the
+  symbol's declared `pawnKindDef` — three placements of the same layout
+  yielded 4/3/5 correct kinds out of 5, the rest arriving as vanilla
+  Colonist/Baseliner on the exact symbol cell, no error logged. A
+  per-defName census of one placement is stochastic; it can never prove a
+  symbol absent.
+
+**Honest instrument:** count the deterministic thing (the symbol cells in the
+shipped layout XML), then place more than once before trusting a defName
+census of the *spawned* result.
+
+## 17. Two displayed values, two sources
+
+**Shape.** A display draws two fields that are meant to represent one
+quantity from two different underlying sources. They will eventually
+disagree, and the disagreement tends to favour the more flattering direction
+rather than a random one.
+
+- **A statusline drew its progress bar from `used_percentage` and its printed
+  number from `total_input_tokens`** (the last request's uncached input,
+  ~7k against a 450k context) — overstating context headroom by roughly
+  440k tokens.
+
+**Honest instrument:** derive one displayed value from the other, never both
+from separate sources that can drift apart.
