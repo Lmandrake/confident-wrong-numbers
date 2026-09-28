@@ -36,6 +36,7 @@ one will wear a different filename.
 | **A proxy set as the population.** a 2-name spot check subtracted as if it were the whole gated set | the proxy | count the population directly; a spot check is a smoke test, never an operand |
 | **A text scan that ignores grammar.** defNames inside XML comments; `[Tool(` and its name on separate lines scanned line by line | tokens the parser would discard, or would join | strip comments / match the region as text / parse; whatever the consumer does, do that |
 | **An uncalibrated zero.** "no fire started" on ground that cannot burn; "not found" from a tool that cannot see that kind | the instrument's blind spot | run it on a case where the answer is known to be non-zero first |
+| **A membership test as a cardinality test.** "is X present in the expected set" checked once per item | whether the item occurs at all — a DUPLICATED item still reads as present, so repetition is invisible | compare multisets/counts, not set membership, whenever the failure mode you care about is repetition |
 
 Two asymmetries fall out of the table and are worth carrying separately:
 
@@ -112,6 +113,10 @@ from, and carry that row to the next query the hook cannot see.
 - **`calibrating-binary-formats`** — the bytes are opaque and you are guessing
   the encoding. Here the text is perfectly readable and you asked it the wrong
   question.
+- **`grader-validation`** — the lying instrument is a scorer, oracle, guard, or
+  witness you built to grade your own work, not a one-off query. Use that skill
+  when the wrong number is itself a correctness verdict — "0 lost", "0
+  violations", "all tests pass" — rather than a fact about the world.
 
 Catalogue of instances, generalized shape first and a concrete example second:
 `references/instances.md`.

@@ -23,6 +23,7 @@ Contents:
 15. [An acceptance window that cannot fail](#15-an-acceptance-window-that-cannot-fail)
 16. [A single sample of a stochastic process](#16-a-single-sample-of-a-stochastic-process)
 17. [Two displayed values, two sources](#17-two-displayed-values-two-sources)
+18. [A membership test as a cardinality test](#18-a-membership-test-as-a-cardinality-test)
 
 ---
 
@@ -354,3 +355,22 @@ rather than a random one.
 
 **Honest instrument:** derive one displayed value from the other, never both
 from separate sources that can drift apart.
+
+## 18. A membership test as a cardinality test
+
+**Shape.** A check asks "is each expected item present" and stops there. An
+item that occurs the right number of times and an item that occurs twice both
+answer "present" — the check cannot distinguish them, so repetition is
+invisible to it no matter how the rest of the pipeline behaves.
+
+- **A containment scorer over a document's parent/child structure** asked only
+  whether each expected child appeared under its parent. A child block that had
+  been attached to its parent TWICE — a fabricated duplicate edge — passed as
+  "0 lost, 0 spurious", because presence was the only thing being asked.
+  Comparing multisets instead of sets surfaced the duplication directly, as its
+  own reported column rather than folded into a pass/fail.
+
+**Honest instrument:** whenever the failure mode you are actually worried about
+is repetition rather than absence, compare counts or multisets, never plain set
+membership. See `grader-validation` when the check doing the counting is one
+you built to grade your own work.
