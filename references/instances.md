@@ -24,6 +24,8 @@ Contents:
 16. [A single sample of a stochastic process](#16-a-single-sample-of-a-stochastic-process)
 17. [Two displayed values, two sources](#17-two-displayed-values-two-sources)
 18. [A membership test as a cardinality test](#18-a-membership-test-as-a-cardinality-test)
+19. [A truthiness default as a presence default](#19-a-truthiness-default-as-a-presence-default)
+20. [A conclusion printed unconditionally beside its evidence](#20-a-conclusion-printed-unconditionally-beside-its-evidence)
 
 ---
 
@@ -374,3 +376,50 @@ invisible to it no matter how the rest of the pipeline behaves.
 is repetition rather than absence, compare counts or multisets, never plain set
 membership. See `grader-validation` when the check doing the counting is one
 you built to grade your own work.
+
+## 19. A truthiness default as a presence default
+
+**Shape.** An "if missing, say so" default — `//` in jq, `or` in Python, `||`
+in JavaScript — fires on every *falsy* value, not only on absence. A field whose
+legitimate value is `false`, `0`, or `""` is reported as missing. The query reads
+as a presence check and answers a truthiness check, with a clean label either way.
+The inversion is worst exactly when the falsy value is the thing being measured.
+
+- **A boolean config flag read with jq's alternative operator.**
+  `jq '.projects[$p].hasTrustDialogAccepted // "absent"'` over `~/.claude.json`
+  printed **absent** for precisely the entries whose stored value was `false` —
+  the value under investigation. Across five config backups this produced the
+  finding "the key was never written, so the flag has never been recorded",
+  when the key was present and `false` in every one of them. The same session's
+  `has("hasTrustDialogAccepted")` count said **0 absent**, flatly contradicting
+  it; the contradiction between two readings was the only reason the first was
+  caught, and the wrong one had already been reported.
+
+**Honest instrument:** `has("key")` for presence, and
+`if has("k") then .k else "absent" end` when you want to distinguish absent from
+`false`. Never `//` on a field that can legitimately be `false` or `0`. The
+general rule: a default that triggers on falsiness cannot answer a question about
+existence.
+
+## 20. A conclusion printed unconditionally beside its evidence
+
+**Shape.** A command prints evidence, then a trailing `echo` says what the
+evidence means. The `echo` is a separate command joined by `;` — it runs whether
+or not the search matched, so the stated conclusion is independent of the result.
+Readers quote the sentence, not the output above it, so a confident negative
+survives even when the evidence directly refutes it.
+
+- **A grep for callers with its own verdict appended.**
+  `grep -rn "CLAUDE\.md" bin/ tools/ lib/ ; echo "(none above = no Lodestar tool
+  writes CLAUDE.md)"` printed eighteen matching lines showing `sync.py` and
+  `converge_machine.py` rendering that very file — with the sentence "no Lodestar
+  tool writes CLAUDE.md" immediately beneath them. It was reported as fact and
+  retracted a message later. Earlier in the same session the identical pattern had
+  printed "(none above = Lodestar never touches the trust store)" under output that
+  happened to agree, so the habit had already been reinforced once by luck.
+
+**Honest instrument:** let exit status carry the verdict —
+`if grep -q ...; then echo FOUND; else echo NONE; fi` — or print only the count
+and draw the conclusion in prose afterwards, where it is visibly your inference
+rather than apparently the command's output. A label that cannot vary with the
+result is decoration, not measurement.

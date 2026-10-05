@@ -37,6 +37,8 @@ one will wear a different filename.
 | **A text scan that ignores grammar.** defNames inside XML comments; `[Tool(` and its name on separate lines scanned line by line | tokens the parser would discard, or would join | strip comments / match the region as text / parse; whatever the consumer does, do that |
 | **An uncalibrated zero.** "no fire started" on ground that cannot burn; "not found" from a tool that cannot see that kind | the instrument's blind spot | run it on a case where the answer is known to be non-zero first |
 | **A membership test as a cardinality test.** "is X present in the expected set" checked once per item | whether the item occurs at all — a DUPLICATED item still reads as present, so repetition is invisible | compare multisets/counts, not set membership, whenever the failure mode you care about is repetition |
+| **A truthiness default as a presence default.** jq `.k // "absent"`, Python `or`, JS `||` | whether the value is *truthy* — a field legitimately `false`, `0` or `""` reports as MISSING, worst when that value is the thing measured | `has("k")` for presence; `if has("k") then .k else "absent" end` to tell absent from `false` |
+| **A conclusion printed unconditionally beside its evidence.** `grep ... ; echo "(none above = X)"` | nothing — the `echo` runs regardless of the match, so the verdict is independent of the result, and readers quote the verdict | let exit status decide: `if grep -q ...; then ... else ... fi`; or print the count and infer in prose, visibly yours |
 
 Two asymmetries fall out of the table and are worth carrying separately:
 
