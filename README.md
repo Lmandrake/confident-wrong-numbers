@@ -38,3 +38,5 @@ is conveniently or alarmingly round is a query bug until proven otherwise*, and
 instrument* — were written into that project's instruction file after repeated
 incidents; this skill is where they generalize. The RimWorld paths and def names
 in the catalogue are examples only.
+
+> Moved to MandrakeWorkflows/skills/confident-wrong-numbers on 2026-10-15 (github.com/Lmandrake/MandrakeWorkflows). This repo is archived.
